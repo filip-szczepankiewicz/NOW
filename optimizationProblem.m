@@ -76,28 +76,41 @@ classdef optimizationProblem
             obj.sMaxConstraint = obj.sMax*obj.dt^2;
             obj.integralConstraint = obj.eta*obj.gMaxConstraint^2*obj.totalTimeActual/obj.dt;
             
-            obj.tolMaxwell = obj.MaxwellIndex/obj.dt; %
+            obj.tolMaxwell = obj.MaxwellIndex * obj.dt;
             
-            if ~isempty(obj.zeroGradientAtIndex) && obj.doMaxwellComp
-                signs = ones(obj.N - 1,1); % Ghost points excluded during opt
-                signs(obj.zeroGradientAtIndex(end) + 1:end) = -1;
+            % Create sign vector to store info on spin dephasing direction.
+            % This is now done independent of Maxwell compensation.
+            if ~isempty(obj.zeroGradientAtIndex)
+                signs = ones(obj.N - 1, 1); % Ghost points excluded during opt
+                midpt = ceil(mean(obj.zeroGradientAtIndex));
+                signs(midpt:end) = -1;
                 obj.signs = signs;
-                
             else
+                obj.signs = ones(obj.N - 1, 1); % Ghost points excluded during opt
+            end
+            
+            if obj.doMaxwellComp && isempty(obj.zeroGradientAtIndex)
                 % Maxwell terms cannot be compensated if no 180 pulses are
-                % used. Normally this kind of optimization is intended for
+                % present. Normally this kind of optimization is intended for
                 % a repetition of two identical self-balanced waveforms,
                 % but it may be necessary to warn users that single-sided
                 % experiments will always incurr some error due to
                 % concomitant fields. In practice the "weight" of the
                 % optimization with respect to Maxwell terms is removed by
-                % setting the sign vector to all zeros.
-                obj.doMaxwellComp = false;
-                obj.signs = zeros(obj.N - 1,1)+eps; % setting to zero flips out due to sqrt(0)=complex (??)
+                % setting the tolerance to a large value.
+                
+                % This error can be commented out, or made into a warning, if you know 
+                % what you are doing!
+                error('Maxwell compensation is impossible for 0 refocusing pulses!')
+            end
+            
+            if obj.doMaxwellComp == false
+                obj.MaxwellIndex = 10^10;
             end
             
         end
+        
     end
-    
 end
+
 

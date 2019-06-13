@@ -58,7 +58,7 @@ while ~optimizationSuccess && iter <= 10
     tic
     
 	[x,fval,exitflag,output,lambda,grad]  = fmincon(@(x) objFun(x), x0, A,b,Aeq,beq,[],[],@(x) feval(nonlconFileName,x,problem.tolIsotropy, ...
-											problem.gMaxConstraint, problem.integralConstraint,problem.targetTensor, problem.tolMaxwell*problem.dt^2, ...
+											problem.gMaxConstraint, problem.integralConstraint,problem.targetTensor, problem.tolMaxwell, ...
 											problem.signs),options);
 	
     optimizationTime = toc;
@@ -104,15 +104,9 @@ result.optimizerOutput = output;
 result.optimizationTime = optimizationTime;
 result.iter = iter-1;
 result.rawq = x(1:(end-1));
-
-if problem.doMaxwellComp
-    rf = problem.signs;                
-else
-    rf = ones(size(problem.signs));
-end
-
+              
 result.zind = problem.zeroGradientAtIndex;       % Keep this info for save function
-result.rf   = [rf(1); rf; rf(end)];              % Spin direction
+result.rf   = [problem.signs(1); problem.signs; problem.signs(end)]; % Spin direction
 result.gwf  = bsxfun(@times, result.rf, g/1000); % T/m
 result.dt   = problem.dt/1000;                   % s
 
