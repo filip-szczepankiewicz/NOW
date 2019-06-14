@@ -44,9 +44,9 @@ else
 end
 
 if useMaxNorm
-    fileName = ['private/nonlcon' num2str(N) 'pointsMaxNorm'];
+    fileName = [fileparts(mfilename('fullpath')) filesep 'nonlcon' num2str(N) 'pointsMaxNorm'];
 else
-    fileName = ['private/nonlcon' num2str(N) 'points2Norm'];
+    fileName = [fileparts(mfilename('fullpath')) filesep 'nonlcon' num2str(N) 'points2Norm'];
 end
 matlabFunction(c,[],gradc,[],'file',fileName,'vars',{[q;s],tolIsotropy,gMax, integralConstraint,targetTensor, tolMaxwell, signs}); %The [] are for the inequality constraints
 
