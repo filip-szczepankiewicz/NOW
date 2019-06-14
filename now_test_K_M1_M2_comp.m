@@ -8,10 +8,10 @@ p.useMaxNorm = 1;
 
 p.durationSecondPartRequested = 24;
 
-p.FlowIndex = 1;
-p.AccIndex  = 1;
+p.FlowIndex = .01;
+p.AccIndex  = 1/10000;
 
-switch 2
+switch 1
     case 1 %STE
         p.MaxwellIndex = 10^10;
         p.KmatrixIndex = 1000;
@@ -28,7 +28,7 @@ p = optimizationProblem(p);
 
 now_print_requested_and_real_times(p)
 
-[r, p] = NOW_MULTISCALE(p, [20 50], [3 1]);
+[r, p] = NOW_MULTISCALE(p, [20 50], [7 1]);
 
 zind = (diag(p.targetTensor) == 0)';
 r.g(:,zind) = 0;
@@ -48,3 +48,9 @@ plot(f)
 
 subplot(2,1,2)
 plot(a)
+
+
+P = gwf_to_pars(r.gwf, r.rf, r.dt);
+k0 = P.k0
+k1 = P.k1
+k2 = P.k2
