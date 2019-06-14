@@ -3,7 +3,7 @@ q = sym('q',[3*N,1], 'real');
 targetTensor = sym('targetTensor',[3,3]);
 signs = sym('signs', [N-1,1], 'real');
 
-syms s B gMax tolIsotropy integralConstraint c1 c2 tolMaxwell real
+syms s B gMax tolIsotropy integralConstraint c1 c2 tolMaxwell tolKmatrix tolFlow tolAcc real
 integrationMatrix = eye(N);
 integrationMatrix(1,1) = 0.5;
 integrationMatrix(N,N) = 0.5;
@@ -32,14 +32,19 @@ c5 = g(:,3)'*g(:,3)-integralConstraint;
 M = g'*diag(signs)*g; % In MATLAB >= 2016b, broadcasting is preferable.
 c6 = norm(M, 'fro') - tolMaxwell;
 
+c7 = 2*abs(M(3,3)) + 4*abs(M(1,1) + M(2,2)) + 2*abs(M(1,3)) + 2*abs(M(2,3)) - tolKmatrix;
+
+c8 = sum((g' *  linspace(0,N-1,N-1)'    ).^2) - tolFlow;
+c9 = sum((g' * (linspace(0,N-1,N-1).^2)').^2) - tolAcc;
+
 
 if useMaxNorm == false
     c2 = (sum(g.^2,2)-gMax^2)';%Nonlinear inequality constraint <= 0
     
-    c = [c1 c2 c3 c4 c5 c6];
+    c = [c1 c2 c3 c4 c5 c6 c7 c8 c9];
     gradc = jacobian(c,[q;s]).'; % transpose to put in correct form
 else
-    c = [c1 c3 c4 c5 c6];
+    c = [c1    c3 c4 c5 c6 c7 c8 c9];
     gradc = jacobian(c,[q;s]).'; % transpose to put in correct form
 end
 
@@ -48,6 +53,6 @@ if useMaxNorm
 else
     fileName = [fileparts(mfilename('fullpath')) filesep 'nonlcon' num2str(N) 'points2Norm'];
 end
-matlabFunction(c,[],gradc,[],'file',fileName,'vars',{[q;s],tolIsotropy,gMax, integralConstraint,targetTensor, tolMaxwell, signs}); %The [] are for the inequality constraints
+matlabFunction(c,[],gradc,[],'file',fileName,'Optimize', false,'vars',{[q;s],tolIsotropy,gMax, integralConstraint,targetTensor, tolMaxwell, signs, tolKmatrix, tolFlow, tolAcc}); %The [] are for the inequality constraints
 
 

@@ -32,7 +32,11 @@ classdef optimizationProblem
         name = 'NOW';
         x0 = [];
         doMaxwellComp = true;
+        doKmatrixNull = false;
         MaxwellIndex = 100;
+        KmatrixIndex = 100;
+        FlowIndex    = 50;
+        AccIndex     = 50;
         MaxFunEval = 1e5;
         MaxIter    = 5e3;
     end
@@ -41,6 +45,9 @@ classdef optimizationProblem
         zeroGradientAtIndex = [];
         tolIsotropy = .5e-2; %before 1e-4
         tolMaxwell
+        tolKmatrix
+        tolFlow
+        tolAcc
         signs
         tolSlew
         durationFirstPartActual
@@ -77,6 +84,10 @@ classdef optimizationProblem
             obj.integralConstraint = obj.eta*obj.gMaxConstraint^2*obj.totalTimeActual/obj.dt;
             
             obj.tolMaxwell = obj.MaxwellIndex * obj.dt;
+            obj.tolKmatrix = obj.KmatrixIndex * obj.dt;
+            
+            obj.tolFlow = 1;
+            obj.tolAcc = 1;
             
             % Create sign vector to store info on spin dephasing direction.
             % This is now done independent of Maxwell compensation.

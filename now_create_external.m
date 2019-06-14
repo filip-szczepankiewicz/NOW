@@ -1,0 +1,3 @@
+function now_create_external(N,useMaxNorm)
+
+createConstraintGradientFunction(N,useMaxNorm)
