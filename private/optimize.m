@@ -59,7 +59,7 @@ while ~optimizationSuccess && iter <= 10
     
 	[x,fval,exitflag,output,lambda,grad]  = fmincon(@(x) objFun(x), x0, A,b,Aeq,beq,[],[],@(x) feval(nonlconFileName,x,problem.tolIsotropy, ...
 											problem.gMaxConstraint, problem.integralConstraint,problem.targetTensor, problem.tolMaxwell, ...
-											problem.signs),options);
+											problem.signs, problem.tolKmatrix, problem.tolFlow, problem.tolAcc),options);
 	
     optimizationTime = toc;
     

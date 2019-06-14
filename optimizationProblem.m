@@ -86,8 +86,8 @@ classdef optimizationProblem
             obj.tolMaxwell = obj.MaxwellIndex * obj.dt;
             obj.tolKmatrix = obj.KmatrixIndex * obj.dt;
             
-            obj.tolFlow = 1;
-            obj.tolAcc = 1;
+            obj.tolFlow    = obj.FlowIndex / (obj.dt/1000)^4 /  (2.6751e+08)^2 * 1e6 * 1e6;
+            obj.tolAcc     = obj.AccIndex  / (obj.dt/1000)^5 /  (2.6751e+08)^2 * 1e6 * 1e6;
             
             % Create sign vector to store info on spin dephasing direction.
             % This is now done independent of Maxwell compensation.
