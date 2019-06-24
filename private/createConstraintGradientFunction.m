@@ -1,4 +1,9 @@
-function createConstraintGradientFunction(N,useMaxNorm)
+function createConstraintGradientFunction(N,useMaxNorm,doOptimize)
+
+if nargin<3
+    doOptimize = true;
+end
+
 q = sym('q',[3*N,1], 'real');
 targetTensor = sym('targetTensor',[3,3]);
 signs = sym('signs', [N-1,1], 'real');
@@ -53,6 +58,6 @@ if useMaxNorm
 else
     fileName = [fileparts(mfilename('fullpath')) filesep 'nonlcon' num2str(N) 'points2Norm'];
 end
-matlabFunction(c,[],gradc,[],'file',fileName,'Optimize', false,'vars',{[q;s],tolIsotropy,gMax, integralConstraint,targetTensor, tolMaxwell, signs, tolKmatrix, tolFlow, tolAcc}); %The [] are for the inequality constraints
+matlabFunction(c,[],gradc,[],'file',fileName,'Optimize', doOptimize,'vars',{[q;s],tolIsotropy,gMax, integralConstraint,targetTensor, tolMaxwell, signs, tolKmatrix, tolFlow, tolAcc}); %The [] are for the inequality constraints
 
 
