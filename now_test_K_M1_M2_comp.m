@@ -6,11 +6,16 @@ p.N = 50;
 p.redoIfFailed = 0;
 p.useMaxNorm = 1;
 
-p.sMax = 80;
+p.sMax = 60;
 
 p.durationFirstPartRequested = 31-9;
 p.durationSecondPartRequested = 31-6-9;
 p.durationZeroGradientRequested = 8;
+
+% Nery times
+p.durationFirstPartRequested = 33;
+p.durationSecondPartRequested = 29;
+p.durationZeroGradientRequested = 6;
 
 p.FlowIndex = .1;
 p.AccIndex  = 1/1000;
@@ -22,9 +27,9 @@ p.AccIndex  = 1/1000;
 
 % stable max values
 % p.FlowIndex = 10^5;
-% p.AccIndex  = 10^1;
+p.AccIndex  = 10^1;
 
-switch 1
+switch 2
     case 0 %STE Mmatrix
         p.MaxwellIndex = 100;
         p.KmatrixIndex = 10^8;
@@ -32,7 +37,7 @@ switch 1
         p.targetTensor = [1 0 0; 0 1 0; 0 0 1];
         
     case 1 %STE Kmatrix
-        p.MaxwellIndex = 10^7;
+        p.MaxwellIndex = 10^6;
         p.KmatrixIndex = 5000;
         
         p.targetTensor = [1 0 0; 0 1 0; 0 0 1];
