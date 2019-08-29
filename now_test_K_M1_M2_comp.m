@@ -17,8 +17,8 @@ p.durationFirstPartRequested = 33;
 p.durationSecondPartRequested = 29;
 p.durationZeroGradientRequested = 6;
 
-p.FlowIndex = .1;
-p.AccIndex  = 1/1000;
+p.FlowIndex = .01;
+p.AccIndex  = 1/10000;
 
 
 % % Very small values
@@ -27,7 +27,7 @@ p.AccIndex  = 1/1000;
 
 % stable max values
 % p.FlowIndex = 10^5;
-p.AccIndex  = 10^1;
+% p.AccIndex  = 10^1;
 
 switch 2
     case 0 %STE Mmatrix
