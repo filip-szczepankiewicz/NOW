@@ -39,7 +39,7 @@ c6 = norm(M, 'fro') - tolMaxwell;
 
 c7 = 2*abs(M(3,3)) + 4*abs(M(1,1) + M(2,2)) + 2*abs(M(1,3)) + 2*abs(M(2,3)) - tolKmatrix;
 
-c8 = sum((g' *  linspace(0,N-1,N-1)'    ).^2) - tolFlow;
+c8 = sum((g' * (linspace(0,N-1,N-1).^1)').^2) - tolFlow;
 c9 = sum((g' * (linspace(0,N-1,N-1).^2)').^2) - tolAcc;
 
 
