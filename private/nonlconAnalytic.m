@@ -75,6 +75,23 @@ dM_dq = firstTerm + secondTerm;
 dc6_dq = reshape(dc6_dM, [1, 9]) * dM_dq;
 dc6_dx = [dc6_dq, 0];
 
+flowconst = 10000;
+
+c7 = abs(g(:,1)' * (linspace(1,N, N-1).^1)') - flowconst
+c8 = abs(g(:,2)' * (linspace(1,N, N-1).^1)') - flowconst;
+c9 = abs(g(:,3)' * (linspace(1,N, N-1).^1)') - flowconst;
+
+
+dc7_dx = zeros(1, 3*N+1);
+dc7_dx(1:N)           = (g(:,1)' .* (linspace(1,N, N-1).^1)) * firstDerivativeMatrix ;
+
+dc8_dx = zeros(1, 3*N+1);
+dc8_dx((N+1):(2*N))   = (g(:,2)' .* (linspace(1,N, N-1).^1)) * firstDerivativeMatrix ;
+
+dc9_dx = zeros(1, 3*N+1);
+dc9_dx((2*N+1):(3*N)) = (g(:,3)' .* (linspace(1,N, N-1).^1)) * firstDerivativeMatrix ;
+
+
 if useMaxNorm == false
     c2 = (sum(g.^2,2)-gMax^2)'; %Nonlinear inequality constraint <= 0
 
@@ -83,20 +100,26 @@ if useMaxNorm == false
               bsxfun(@times, 2*firstDerivativeMatrix, g(:, 3))];
     dc2_dx = [dc2_dq, zeros(N-1, 1)];
     
-    c = [c1 c2 c3 c4 c5 c6];
+    c = [c1 c2 c3 c4 c5 c6 c7 c8 c9];
     gradc = [dc1_dx;
              dc2_dx;
              dc3_dx;
              dc4_dx;
              dc5_dx;
-             dc6_dx]'; % transpose the Jacobian to put in fmincon form
+             dc6_dx;
+             dc7_dx;
+             dc8_dx;
+             dc9_dx]'; % transpose the Jacobian to put in fmincon form
 else
-    c = [c1 c3 c4 c5 c6];
+    c = [c1 c3 c4 c5 c6 c7 c8 c9];
     gradc = [dc1_dx;
              dc3_dx;
              dc4_dx;
              dc5_dx;
-             dc6_dx]'; % transpose the Jacobian to put in fmincon form
+             dc6_dx;
+             dc7_dx;
+             dc8_dx;
+             dc9_dx]'; % transpose the Jacobian to put in fmincon form
 end
 
 ceq = [];
