@@ -51,7 +51,7 @@ while ~optimizationSuccess && iter <= 10
         dispInfo(problem, iter)
         
         tic
-
+        
         [x,fval,exitflag,output,lambda,grad]  = fmincon(@(x) objFun(x), x0, A,b,Aeq,beq,[],[], @(x) nonlconAnalytic(x,problem.tolIsotropy, ...
             problem.gMaxConstraint, problem.integralConstraint,problem.targetTensor, problem.tolMaxwell*problem.dt^2, ...
             problem.signs, problem.useMaxNorm, problem.motionCompensation, problem.dt),options);
@@ -177,9 +177,24 @@ for i = 1:length(linear_ind)
         order = problem.motionCompensation.order(linear_ind(i));
         Aeq(2+length(problem.zeroGradientAtIndex)+i,:) = - order * problem.dt * t.^(order-1);
 end
+
+
+% Background compensation
+if problem.doBackgroundCompensation > 0
+    s = problem.startTime; % ms
+    H = cumsum([1; problem.signs])' * problem.dt + s; % Safe to ignore dt because we'll equate to zero.
+    % Compute the integral of q*H using the trapezoidal rule (ignoring dt again):
+    Aeq(2 + length(problem.zeroGradientAtIndex) + length(linear_ind) + 1, 1) = H(1)/2;
+    Aeq(2 + length(problem.zeroGradientAtIndex) + length(linear_ind) + 1, 2:(end-1)) = H(2:(end-1));
+    Aeq(2 + length(problem.zeroGradientAtIndex) + length(linear_ind) + 1, end) = H(end)/2;
+end
+
+% Copy constraints to the three axes
+Aeq = kron(eye(3),Aeq);
+
+
+if problem.enforceSymmetry
     
-% Enforce symmetry about zero gradient interval
-if problem.enforceSymmetry == true
     if isempty(problem.zeroGradientAtIndex)
         indicesBefore = 1:floor(problem.N/2);
         indicesAfter = floor(problem.N/2) + (1:ceil(problem.N/2));
@@ -188,13 +203,33 @@ if problem.enforceSymmetry == true
         indicesAfter = (problem.zeroGradientAtIndex(end)+1):problem.N;
     end
     
-    assert(length(indicesBefore) == length(indicesAfter),'Cannot enforce symmetry since the number of time samples before and after zero gradient interval is not equal.')
-    
+    assert(length(indicesBefore) == length(indicesAfter), 'Cannot enforce symmetry since the number of time samples before and after zero gradient interval is not equal.')
     Nactivated = length(indicesBefore);
-    Aeq = [Aeq;fliplr(eye(Nactivated)), zeros(Nactivated,problem.N-2*Nactivated),-eye(Nactivated)]; %q(1) = q(end) and so on.
+    
+    ZP = zeros(Nactivated,problem.N-2*Nactivated);
+    ZA = zeros(Nactivated);
+    ED = eye(Nactivated);
+    EU = fliplr(ED);
+    
 end
 
-Aeq = kron(eye(3),Aeq);
+
+% MODE 1: Enforce symmetry about zero gradient interval
+% Each axis being mirror symmetric to itself.
+if problem.enforceSymmetry == 1
+    tmp = [ED, ZP, -EU];
+    Aeq = [Aeq; kron(eye(3), tmp)];
+end
+
+
+% MODE 2: Generate axisymmetrix diffusion time spectra
+if problem.enforceSymmetry == 2
+    Aeq = [Aeq;      [ED, ZP, -EU,   ZA, ZP, ZA,     ZA, ZP, ZA] ];
+    Aeq = [Aeq;      [ZA, ZP, ZA,    ED, ZP, ZA,    ZA, ZP, -EU] ];
+    Aeq = [Aeq;      [ZA, ZP, ZA,    ZA, ZP, ED,    -EU, ZP, ZA] ];
+end
+
+
 Aeq = sparse([Aeq zeros(size(Aeq,1),1)]); %Add column of zeros for s
 beq = zeros(size(Aeq,1),1);
 end
